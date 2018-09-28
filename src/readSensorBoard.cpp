@@ -1,16 +1,10 @@
-/*
- * Blink
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
-
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
 char raw[3];
 char data[3];
 char uartbuf[32];
-signed char frame[4];
+int frame[4];
 int cnt,i;
 
 void setup()
@@ -20,7 +14,7 @@ void setup()
   Serial1.begin(57600,SERIAL_9N1);
 //  Serial1.begin(26320,SERIAL_9N1);
   Serial2.begin(115200);
-  Serial2.write("Copy Data from Serial1 to Serial2");
+  Serial2.write("debug sensorboard data");
 }
 // LS closed
 // A5 = 1010 0101
@@ -32,18 +26,18 @@ void setup()
 
 void loop()
 {
+
   if(Serial1.available()) {
     Serial1.readBytes(data,2);
     if(*data == 0xb8 ) {
       digitalWrite(PC13, LOW);
       for(i=0;i<4;i++) {
         while(!Serial1.available());
-        Serial1.readBytes(data,2);
-        frame[i] = (int)*data;
+        frame[i] = Serial1.read();
       }
       sprintf(uartbuf,"%04d_%04d_%04d_%04d|", frame[0],frame[1],frame[2],frame[3]);
       Serial2.write(uartbuf);
-      if(cnt++ % 4 == 0 ) {
+      if(cnt++ % 1 == 0 ) {
         Serial2.write("\r\n");
       }
       digitalWrite(PC13, HIGH);
